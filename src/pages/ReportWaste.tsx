@@ -34,8 +34,6 @@ type WasteAnalysis = {
   needsCollection: boolean
 }
 
-// Uses Vercel environment variable in production.
-// Falls back to localhost for local development.
 const API_URL =
   import.meta.env.VITE_API_URL ||
   'http://localhost:5000'
@@ -85,12 +83,23 @@ function getConfidencePercentage(confidence: number) {
 export default function ReportWaste() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedImage, setSelectedImage] =
+    useState<string | null>(null)
+
+  const [selectedFile, setSelectedFile] =
+    useState<File | null>(null)
+
   const [fileName, setFileName] = useState('')
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [showResult, setShowResult] = useState(false)
-  const [analysis, setAnalysis] = useState<WasteAnalysis | null>(null)
+
+  const [isAnalyzing, setIsAnalyzing] =
+    useState(false)
+
+  const [showResult, setShowResult] =
+    useState(false)
+
+  const [analysis, setAnalysis] =
+    useState<WasteAnalysis | null>(null)
+
   const [error, setError] = useState('')
 
   const handleFileChange = (
@@ -201,7 +210,8 @@ export default function ReportWaste() {
         )
       }
 
-      const result: WasteAnalysis = data.analysis
+      const result: WasteAnalysis =
+        data.analysis
 
       console.log(
         '🤖 Gemini analysis:',
@@ -211,13 +221,11 @@ export default function ReportWaste() {
       setAnalysis(result)
       setShowResult(true)
 
-      // Save real AI result
       localStorage.setItem(
         'ecoworth-analysis',
         JSON.stringify(result),
       )
 
-      // Save basic waste information
       localStorage.setItem(
         'ecoworth-waste-type',
         result.isWaste
@@ -299,7 +307,6 @@ export default function ReportWaste() {
               className="flex items-center"
             >
               <div className="flex items-center gap-2">
-
                 <div
                   className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold ${
                     index === 0
@@ -319,7 +326,6 @@ export default function ReportWaste() {
                 >
                   {label}
                 </span>
-
               </div>
 
               {index < 3 && (
@@ -563,7 +569,6 @@ export default function ReportWaste() {
               className="rounded-3xl bg-white p-6 shadow-xl shadow-emerald/5 sm:p-10"
             >
 
-              {/* RESULT HEADER */}
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
 
                 <div>
@@ -645,10 +650,9 @@ export default function ReportWaste() {
                 </div>
               ) : (
                 <>
-                  {/* REAL WASTE RESULT */}
+                  {/* WASTE RESULT */}
                   <div className="mt-8 grid gap-6 lg:grid-cols-2">
 
-                    {/* IMAGE */}
                     <div className="overflow-hidden rounded-2xl bg-gray-100">
                       <img
                         src={selectedImage || undefined}
@@ -657,10 +661,8 @@ export default function ReportWaste() {
                       />
                     </div>
 
-                    {/* ANALYSIS */}
                     <div className="space-y-3">
 
-                      {/* WASTE TYPE */}
                       <div className="rounded-2xl bg-mint p-5">
 
                         <p className="text-xs text-gray-500">
@@ -677,7 +679,6 @@ export default function ReportWaste() {
 
                       </div>
 
-                      {/* CONFIDENCE + CONDITION */}
                       <div className="grid grid-cols-2 gap-3">
 
                         <div className="rounded-2xl bg-gray-50 p-5">
@@ -709,7 +710,6 @@ export default function ReportWaste() {
 
                       </div>
 
-                      {/* RECOVERY */}
                       <div className="rounded-2xl border border-emerald/10 p-5">
 
                         <p className="text-xs text-gray-500">
@@ -724,7 +724,6 @@ export default function ReportWaste() {
 
                       </div>
 
-                      {/* ACTION */}
                       <div className="rounded-2xl bg-forest p-5 text-white">
 
                         <p className="text-xs text-white/60">
@@ -782,9 +781,9 @@ export default function ReportWaste() {
                           </p>
 
                           <p className="mt-1 text-sm text-gray-600">
-                            The next step can capture your location
-                            and route this report to the appropriate
-                            waste-management team.
+                            The next step captures your location
+                            and routes this report to the appropriate
+                            waste-management destination.
                           </p>
                         </div>
 
@@ -793,11 +792,11 @@ export default function ReportWaste() {
                     </div>
                   )}
 
-                  {/* ACTION BUTTONS */}
+                  {/* IMPORTANT:
+                      THIS GOES TO /location
+                      NOT /recommendation */}
                   <div className="mt-8 flex flex-col gap-3 sm:flex-row">
 
-                    {/* CHANGED:
-                        Recommendation → Location & Routing */}
                     <Button
                       size="lg"
                       to="/location"
@@ -820,6 +819,7 @@ export default function ReportWaste() {
                   <p className="mt-5 text-center text-xs text-gray-400">
                     Analysis generated by Gemini AI from the uploaded image.
                   </p>
+
                 </>
               )}
 
