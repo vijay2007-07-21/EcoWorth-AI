@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    @apply bg-white font-sans text-charcoal antialiased;
+  }
+  h1, h2, h3, h4 { @apply font-display tracking-tight; }
+  :focus-visible { @apply outline-none ring-2 ring-leaf ring-offset-2; }
+}
+
+@layer components {
+  .container-page { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+  .glass {
+    @apply border border-white/60 bg-white/70 shadow-glass backdrop-blur-xl;
+  }
+  .card {
+    @apply rounded-3xl border border-emerald/10 bg-white shadow-soft;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full bg-mint px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald;
+  }
+}
