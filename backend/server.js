@@ -8,11 +8,10 @@ dotenv.config();
 
 const app = express();
 
-// Render provides the PORT automatically.
-// Locally it will use 5000.
-const PORT = process.env.PORT || 5000;
+// --------------------------------------------------
+// MIDDLEWARE
+// --------------------------------------------------
 
-// Middleware
 app.use(
   cors({
     origin: "*",
@@ -21,7 +20,10 @@ app.use(
 
 app.use(express.json());
 
-// Image upload configuration
+// --------------------------------------------------
+// IMAGE UPLOAD
+// --------------------------------------------------
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -29,9 +31,12 @@ const upload = multer({
   },
 });
 
-// Check Gemini API key
+// --------------------------------------------------
+// GEMINI
+// --------------------------------------------------
+
 if (!process.env.GEMINI_API_KEY) {
-  console.error("❌ GEMINI_API_KEY is missing in .env");
+  console.error("❌ GEMINI_API_KEY is missing");
 }
 
 const ai = new GoogleGenAI({
@@ -58,7 +63,6 @@ app.post(
   upload.single("image"),
   async (req, res) => {
     try {
-      // Check image
       if (!req.file) {
         return res.status(400).json({
           success: false,
@@ -80,7 +84,7 @@ Analyze the uploaded image carefully.
 
 Your task is NOT simply to identify the object.
 
-You must determine whether the image actually shows WASTE.
+Determine whether the image actually shows WASTE.
 
 Important rules:
 
@@ -144,7 +148,6 @@ Use exactly this structure:
 }
 `;
 
-      // Models to try
       const models = [
         "gemini-3.8-flash",
         "gemini-3.7-flash",
@@ -157,7 +160,6 @@ Use exactly this structure:
       let response = null;
       let lastError = null;
 
-      // Try available models
       for (const model of models) {
         try {
           console.log(
@@ -195,15 +197,11 @@ Use exactly this structure:
 
           console.error(
             `❌ ${model} failed:`,
-            error?.message ||
-              error,
+            error?.message || error,
           );
-
-          // Continue to next model
         }
       }
 
-      // No model worked
       if (!response) {
         console.error(
           "❌ All Gemini models failed.",
@@ -219,10 +217,8 @@ Use exactly this structure:
         });
       }
 
-      // Get Gemini text
       const text =
-        typeof response.text ===
-        "function"
+        typeof response.text === "function"
           ? response.text()
           : response.text;
 
@@ -239,28 +235,16 @@ Use exactly this structure:
         text,
       );
 
-      // Remove possible markdown fences
       const cleanedText = text
-        .replace(
-          /^```json\s*/i,
-          "",
-        )
-        .replace(
-          /^```\s*/i,
-          "",
-        )
-        .replace(
-          /\s*```$/i,
-          "",
-        )
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/\s*```$/i, "")
         .trim();
 
-      // Parse JSON
       let result;
 
       try {
-        result =
-          JSON.parse(cleanedText);
+        result = JSON.parse(cleanedText);
       } catch (parseError) {
         console.error(
           "❌ Could not parse Gemini JSON:",
@@ -275,11 +259,11 @@ Use exactly this structure:
         });
       }
 
-      // Return result
       return res.json({
         success: true,
         analysis: result,
       });
+
     } catch (error) {
       console.error(
         "❌ Waste analysis error:",
@@ -299,15 +283,11 @@ Use exactly this structure:
 );
 
 // --------------------------------------------------
-// START SERVER
+// EXPORT FOR VERCEL
 // --------------------------------------------------
 
-app.listen(
-  PORT,
-  "0.0.0.0",
-  () => {
-    console.log(
-      `🌱 EcoWorth AI backend running on port ${PORT}`,
-    );
-  },
-);
+// IMPORTANT:
+// Do NOT use app.listen() on Vercel.
+// Vercel handles the server automatically.
+
+module.exports = app;
