@@ -34,8 +34,8 @@ type WasteAnalysis = {
   needsCollection: boolean
 }
 
-// Uses Render environment variable after deployment.
-// Uses localhost automatically during local development.
+// Uses Vercel environment variable in production.
+// Falls back to localhost for local development.
 const API_URL =
   import.meta.env.VITE_API_URL ||
   'http://localhost:5000'
@@ -85,19 +85,12 @@ function getConfidencePercentage(confidence: number) {
 export default function ReportWaste() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [selectedImage, setSelectedImage] =
-    useState<string | null>(null)
-
-  const [selectedFile, setSelectedFile] =
-    useState<File | null>(null)
-
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileName, setFileName] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [showResult, setShowResult] = useState(false)
-
-  const [analysis, setAnalysis] =
-    useState<WasteAnalysis | null>(null)
-
+  const [analysis, setAnalysis] = useState<WasteAnalysis | null>(null)
   const [error, setError] = useState('')
 
   const handleFileChange = (
@@ -172,11 +165,6 @@ export default function ReportWaste() {
         '📤 Sending image to EcoWorth AI backend...',
       )
 
-      console.log(
-        '🌐 API URL:',
-        `${API_URL}/api/analyze-waste`,
-      )
-
       const response = await fetch(
         `${API_URL}/api/analyze-waste`,
         {
@@ -196,7 +184,7 @@ export default function ReportWaste() {
         data = await response.json()
       } catch {
         throw new Error(
-          'Backend returned an invalid response. Make sure the backend is running.',
+          'Backend returned an invalid response.',
         )
       }
 
@@ -223,13 +211,13 @@ export default function ReportWaste() {
       setAnalysis(result)
       setShowResult(true)
 
-      // Save REAL AI result
+      // Save real AI result
       localStorage.setItem(
         'ecoworth-analysis',
         JSON.stringify(result),
       )
 
-      // Save useful basic information
+      // Save basic waste information
       localStorage.setItem(
         'ecoworth-waste-type',
         result.isWaste
@@ -253,7 +241,7 @@ export default function ReportWaste() {
           .includes('fetch')
       ) {
         setError(
-          'Cannot connect to the EcoWorth AI backend. Make sure the backend is running on port 5000.',
+          'Cannot connect to the EcoWorth AI backend. Please check the deployed backend URL.',
         )
       } else {
         setError(
@@ -273,8 +261,14 @@ export default function ReportWaste() {
 
         {/* HEADER */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{
+            opacity: 0,
+            y: 20,
+          }}
+          animate={{
+            opacity: 1,
+            y: 0,
+          }}
           className="mx-auto max-w-3xl text-center"
         >
           <span className="eyebrow">
@@ -305,6 +299,7 @@ export default function ReportWaste() {
               className="flex items-center"
             >
               <div className="flex items-center gap-2">
+
                 <div
                   className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold ${
                     index === 0
@@ -324,6 +319,7 @@ export default function ReportWaste() {
                 >
                   {label}
                 </span>
+
               </div>
 
               {index < 3 && (
@@ -338,8 +334,14 @@ export default function ReportWaste() {
           {/* ERROR */}
           {error && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{
+                opacity: 0,
+                y: -10,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
               className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700"
             >
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
@@ -359,8 +361,14 @@ export default function ReportWaste() {
           {/* UPLOAD */}
           {!selectedImage && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{
+                opacity: 0,
+                y: 20,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
               className="rounded-3xl border border-gray-100 bg-white p-6 shadow-xl shadow-emerald/5 sm:p-10"
             >
               <div
@@ -434,8 +442,14 @@ export default function ReportWaste() {
           {/* IMAGE PREVIEW */}
           {selectedImage && !showResult && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{
+                opacity: 0,
+                scale: 0.98,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+              }}
               className="grid gap-6 lg:grid-cols-2"
             >
 
@@ -487,8 +501,8 @@ export default function ReportWaste() {
 
                 <p className="mt-3 leading-7 text-gray-600">
                   Gemini AI will examine the actual uploaded image
-                  and determine the waste type, condition, recovery
-                  potential, and recommended action.
+                  and determine the waste type, condition,
+                  recovery potential, and recommended action.
                 </p>
 
                 <div className="mt-7 space-y-3">
@@ -538,8 +552,14 @@ export default function ReportWaste() {
           {/* RESULT */}
           {showResult && analysis && (
             <motion.div
-              initial={{ opacity: 0, y: 25 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{
+                opacity: 0,
+                y: 25,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
               className="rounded-3xl bg-white p-6 shadow-xl shadow-emerald/5 sm:p-10"
             >
 
@@ -776,11 +796,13 @@ export default function ReportWaste() {
                   {/* ACTION BUTTONS */}
                   <div className="mt-8 flex flex-col gap-3 sm:flex-row">
 
+                    {/* CHANGED:
+                        Recommendation → Location & Routing */}
                     <Button
                       size="lg"
-                      to="/recommendation"
+                      to="/location"
                     >
-                      Continue to Recommendation
+                      Continue to Tracking
                       <ArrowRight className="h-4 w-4" />
                     </Button>
 
